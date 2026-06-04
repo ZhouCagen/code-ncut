@@ -1,0 +1,17 @@
+import matplotlib.pyplot as plt
+import numpy as np
+plt.title("Sample Graph")
+plt.xlabel('x label')
+plt.xlim([0,2])
+plt.xlabel('y.label')
+plt.yticks(np.linspace(0,2,9))
+plt.ylim([0,8])
+plt.yticks(np.linspace(0,8,9))
+x=np.linspace(0,2,10)
+plt.legend(loc='upper left')
+plt.plot(x,x,color='b',label='linear',linewidth='1.0',linestyle='-',marker='o')
+plt.plot(x,x**2,color='g',label='quadratic',linewidth='2.0',linestyle=':')
+plt.plot(x,x**3,color='r',label='cubic',linewidth='3.0',linestyle='-.')
+plt.subplot().set_xticklabels('%.2f'%i for i in np.linspace(0,2,9))
+plt.subplot().set_yticklabels('%.2f'%i for i in np.linspace(0,8,9))
+plt.show()
