@@ -1,0 +1,140 @@
+﻿@using System.Data
+@model DataTable
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>数据库作业模式</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei";
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #F5F5F5;
+            padding: 10px;
+            border-right: 1px solid #DDD;
+            overflow-y: auto;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+            background: white;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 5px;
+            text-align: left;
+            background: white;
+            border: 1px solid #CCC;
+            cursor: pointer;
+        }
+
+            .btn:hover {
+                background: #E3F2FD;
+            }
+
+        .param-box {
+            background: #EEE;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        input {
+            padding: 5px;
+            width: 80px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background: #E0E0E0;
+            padding: 8px;
+            border: 1px solid #999;
+            text-align: left;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #DDD;
+        }
+    </style>
+</head>
+<body>
+    <form action="/Home/Homework" method="post" style="display:flex; width:100%;">
+
+        <div class="sidebar">
+            <h3>作业任务列表</h3>
+            <button class="btn" name="task" value="1">1. 学生出生年份</button>
+            <button class="btn" name="task" value="2">2. 各系人数统计</button>
+            <button class="btn" name="task" value="3">3. CS103/123 成绩</button>
+            <button class="btn" name="task" value="4">4. 选课超3人的教师</button>
+            <button class="btn" name="task" value="5">5. 未选课学生</button>
+            <button class="btn" name="task" value="6">6. 每个学生最高分</button>
+            <button class="btn" name="task" value="7">7. 教数据结构的老师</button>
+            <button class="btn" name="task" value="8">8. 郑大力的学生</button>
+            <hr />
+            <button class="btn" name="task" value="9" style="background:#FFF3E0">9. 建表 S1</button>
+            <button class="btn" name="task" value="10" style="background:#FFF3E0">10. 视图提分</button>
+            <hr />
+            <button class="btn" name="task" value="11" style="background:#E8F5E9">11. 查询成绩段(Proc)</button>
+            <button class="btn" name="task" value="12" style="background:#FFEBEE">12. 删除成绩段(Proc)</button>
+            <button class="btn" name="task" value="13" style="background:#E3F2FD">13. 按学分查询</button>
+        </div>
+
+        <div class="content">
+            <div class="param-box">
+                参数控制台：
+                Low/Credit: <input type="text" name="p1" value="0" />
+                High: <input type="text" name="p2" value="100" />
+                <span style="color:red; margin-left:20px;">@ViewData["Msg"]</span>
+            </div>
+
+            <table border="1">
+                <thead>
+                    @if (Model != null && Model.Columns.Count > 0)
+                    {
+                        <tr>
+                            @foreach (DataColumn col in Model.Columns)
+                            {
+                                <th>@col.ColumnName</th>
+                            }
+                        </tr>
+                    }
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Rows.Count > 0)
+                    {
+                        foreach (DataRow row in Model.Rows)
+                        {
+                            <tr>
+                                @foreach (var item in row.ItemArray)
+                                {
+                                    <td>@item</td>
+                                }
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </form>
+</body>
+</html>

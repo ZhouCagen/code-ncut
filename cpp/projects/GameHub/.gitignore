@@ -1,0 +1,10 @@
+node_modules/
+
+bin/
+build/
+
+*.log
+
+.vscode/
+
+dist/

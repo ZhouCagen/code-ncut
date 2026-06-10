@@ -1,0 +1,232 @@
+﻿@using System.Data
+@model DataTable
+@{
+    Layout = null; string teacherId = ViewData["TeacherID"].ToString(); string courseId = ViewData["CourseID"].ToString();
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>教师管理端</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei";
+            background: #F5F5F5;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 蓝色顶栏 */
+        .header {
+            background: #3F51B5;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* 主布局：左右分栏 */
+        .main-container {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        /* 左侧：列表 */
+        .left-panel {
+            flex: 2;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 5px #CCC;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #E8EAF6;
+            padding: 10px;
+            font-weight: bold;
+            border-bottom: 1px solid #CCC;
+        }
+
+        .table-scroll {
+            overflow: auto;
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #E8EAF6;
+            padding: 10px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #EEE;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        tr:hover {
+            background: #E3F2FD;
+        }
+
+        tr.selected {
+            background: #2196F3;
+            color: white;
+        }
+        /* 选中高亮 */
+
+        /* 右侧：操作区 */
+        .right-panel {
+            flex: 1;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 5px #CCC;
+            padding: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #CCC;
+            box-sizing: border-box;
+        }
+
+        .student-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3F51B5;
+            margin-bottom: 20px;
+        }
+
+        .btn-save {
+            width: 100%;
+            background: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+            .btn-save:hover {
+                background: #45a049;
+            }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">教师管理端 <span style="font-size:16px; font-weight:normal;">| @teacherId</span></div>
+        <div>负责课程: @courseId</div>
+    </div>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="panel-header">选课学生名单</div>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr><th width="150">学号</th><th>姓名</th><th>当前成绩</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (DataRow row in Model.Rows)
+                        {
+                            <tr onclick="selectStudent(this, '@row["SNO"]', '@row["SNAME"]', '@row["GRADE"]')">
+                                <td>@row["SNO"]</td>
+                                <td>@row["SNAME"]</td>
+                                <td>@row["GRADE"]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h3>成绩录入</h3>
+            <div style="color:gray; margin-bottom:10px;">当前选中学生:</div>
+            <div id="display-name" class="student-name">请先在左侧选择学生</div>
+
+            <div class="input-group">
+                <label>输入成绩:</label>
+                <input type="number" id="input-grade" placeholder="0-100" />
+            </div>
+
+            <button class="btn-save" onclick="saveGrade()">保存 / 更新成绩</button>
+            <p style="color:#999; font-size:12px; margin-top:10px;">提示：输入成绩后点击保存即可。</p>
+        </div>
+    </div>
+
+    <script>
+        let currentSno = "";
+        let courseId = '@courseId';
+
+        function selectStudent(row, sno, name, grade) 
+        {
+            document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+            row.classList.add('selected');
+
+            currentSno = sno;
+            document.getElementById('display-name').innerText = name + " (" + sno + ")";
+            document.getElementById('input-grade').value = grade;
+        }
+
+        async function saveGrade() 
+        {
+            if (!currentSno) { alert("请先选择一个学生！"); return; }
+            let grade = document.getElementById('input-grade').value;
+
+            let form = new FormData();
+            form.append('sno', currentSno);
+            form.append('cno', courseId);
+            form.append('grade', grade);
+
+            let res = await fetch('/Home/UpdateGrade', { method: 'POST', body: form });
+            let json = await res.json();
+            if (json.success) 
+            {
+                alert("成绩保存成功！");
+                location.reload(); 
+            }
+            else 
+            {
+                alert("保存失败！");
+            }
+        }
+    </script>
+</body>
+</html>

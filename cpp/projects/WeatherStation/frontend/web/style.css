@@ -1,0 +1,36 @@
+body {
+    font-family: "Segoe UI", sans-serif; /* 设置网页字体为 Segoe UI，如果没有这个字体，用系统默认的 无衬线字体（sans-serif）*/
+    background-color: #f2f7fb;         /* 页面背景颜色*/
+    color: #333;                       /* 文字颜色*/
+    text-align: center;                  /* 页面内容居中显示*/
+    margin: 0;                           /* 清除浏览器默认的外边距，避免页面四周有空白*/
+    padding: 40px;                       /* 页面四周留 40px 内边距，使内容不贴边*/
+}
+
+h1 {
+    color: #0078d7;                    /* 标题颜色*/
+}
+
+#sensor-data {                               /* 通过 ID 选择器 选中 <div id="sensor-data">*/
+    background-color: white;               /* 背景白色*/
+    display: inline-block;                   /* 让元素宽度自适应内容，同时可以设置上下边距*/
+    padding: 25px 50px;                      /* 内边距，内容不贴边，上下 25px，左右 50px*/
+    border-radius: 12px;                     /* 圆角效果*/
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);  /* 轻微阴影，增加层次感*/
+    margin-top: 20px;                        /* 与上方元素保持间距*/
+}
+
+button {
+    display:block;                           /* 让按钮变成块级元素（独占一行），不再和表格并排*/
+    margin: 20px auto 0;                     /* 上外边距 20px；左右自动（auto）让它水平居中；下外边距 0。*/
+    padding: 10px 20px;                      /* 按钮内部空间，上下 10px，左右 20px*/
+    background-color: #0078d7;             /* 蓝色背景*/
+    color: white;                          /* 文字白色*/
+    border: none;                            /* 去掉默认边框*/
+    border-radius: 5px;                      /* 圆角按钮*/
+    cursor: pointer;                         /* 鼠标悬停时显示小手，提示可点击*/
+}
+
+button:hover {
+    background-color: #005fa3;             /* 当鼠标悬停在按钮上时，背景颜色变深蓝*/
+}
