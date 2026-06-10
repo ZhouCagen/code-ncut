@@ -1,0 +1,58 @@
+$date
+   Wed Sep 10 16:58:49 2025
+$end
+
+$version
+  2025.1.0
+  $dumpfile ("instruction_memory_tb.vcd") 
+$end
+
+$timescale
+  1ps
+$end
+
+$scope module instruction_memory_tb $end
+$var reg 32 ! addr [31:0] $end
+$var wire 32 " instruction [31:0] $end
+$scope module uut $end
+$var wire 32 # addr [31:0] $end
+$var reg 32 $ instruction [31:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+
+#0
+$dumpvars
+b0 !
+b100000000000010000000000000101 "
+b0 #
+b100000000000010000000000000101 $
+$end
+
+#10000
+b100 !
+b100000000000100000000000000111 "
+b100 #
+b100000000000100000000000000111 $
+
+#20000
+b1000 !
+b1000100001100000100000 "
+b1000 #
+b1000100001100000100000 $
+
+#30000
+b10000 !
+b1000000000000000000000000110 "
+b10000 #
+b1000000000000000000000000110 $
+
+#40000
+b100000 !
+bx "
+b100000 #
+bx $
+
+#50000
+b111111111100 !
+b111111111100 #

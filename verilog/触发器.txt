@@ -1,0 +1,108 @@
+SR触发器（Set-Reset）
+功能：基本置位/复位控制
+module SR_FF(
+    input clk,       // 时钟信号（上升沿触发）
+    input S, R,      // 置位(S)和复位(R)信号
+    output reg Q,     // 输出
+    output Qn         // 反相输出
+);
+always @(posedge clk) begin
+    case({S, R})
+        2'b01: Q <= 1'b0;  // 复位（R=1）
+        2'b10: Q <= 1'b1;  // 置位（S=1）
+        2'b11: Q <= 1'bx;  // 禁止状态（S=R=1）
+        // 2'b00: 保持（无需显式写出）
+    endcase
+end
+assign Qn = ~Q;  // 反相输出
+endmodule
+
+S	R	Q	Qn
+0	0	保持	保持
+1	0	1	0
+0	1	0	1
+1	1	x	x	(*必须避免)
+
+
+
+
+D触发器（Data）
+//功能：存储1位数据（最常用）
+module D_FF(
+    input clk,       // 时钟
+    input D,         // 数据输入
+    output reg Q     // 数据输出
+);
+always @(posedge clk) begin
+    Q <= D;  // 时钟上升沿锁存输入
+end
+endmodule
+
+增强版（带异步复位）：
+module D_FF_async_rst(
+    input clk,
+    input rst,      // 异步复位（高有效）
+    input D,
+    output reg Q
+);
+always @(posedge clk or posedge rst) begin
+    if(rst) Q <= 1'b0;  // 复位优先
+    else    Q <= D;
+end
+endmodule
+
+真值表：
+CLK↑	D	Q
+0→1	0	0
+0→1	1	1
+其他	X	保持
+
+
+
+
+T触发器（Toggle）
+//功能：翻转控制
+module T_FF(
+    input clk,
+    input T,        // 翻转使能
+    output reg Q
+);
+always @(posedge clk) begin
+    if(T) Q <= ~Q;  // T=1时翻转
+    // T=0时自动保持（无需else）
+end
+endmodule
+
+
+真值表：
+CLK↑	T	Q
+0→1	0	保持
+0→1	1	翻转(~Q)
+
+
+
+
+JK触发器（Jack-King）
+功能：全能型触发器（无禁止状态）
+
+module JK_FF(
+    input clk,
+    input J, K,     // 控制输入
+    output reg Q
+);
+always @(posedge clk) begin
+    case({J, K})
+        2'b00: Q <= Q;     // 保持
+        2'b01: Q <= 1'b0;  // 复位（K=1）
+        2'b10: Q <= 1'b1;  // 置位（J=1）
+        2'b11: Q <= ~Q;    // 翻转
+    endcase
+end
+endmodule
+
+真值表：
+CLK↑	J	K	Q
+0→1	0	0	保持
+0→1	0	1	0
+0→1	1	0	1
+0→1	1	1	翻转(~Q)
