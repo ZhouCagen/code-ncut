@@ -1,8 +1,0 @@
-set_property PACKAGE_PIN V10 [get_ports {N_sel[0]}]
-set_property PACKAGE_PIN AA9 [get_ports {N_sel[1]}]
-set_property PACKAGE_PIN W11 [get_ports {N_sel[2]}]
-set_property PACKAGE_PIN Y11 [get_ports {N_sel[3]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {N_sel[3]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {N_sel[2]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {N_sel[1]}]
-set_property IOSTANDARD LVCMOS18 [get_ports {N_sel[0]}]
