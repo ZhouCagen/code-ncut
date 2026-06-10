@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <spdlog/spdlog.h>
@@ -13,8 +14,7 @@ using namespace std;
 
 int main()
 {
-    const int port = 2006;
-    const int bufferSize = 1024;
+    constexpr uint16_t port = 2006;
     int serverSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (serverSocket == -1)
     {
@@ -22,7 +22,7 @@ int main()
         return EXIT_FAILURE;
     }
 
-    spdlog::info("socket created successfully");
+    spdlog::info("UDP server socket created successfully");
 
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
@@ -40,9 +40,10 @@ int main()
 
     spdlog::info("UDP server bound successfully on port {}", port);
 
+    constexpr size_t bufferSize = 1024;
     char buffer[bufferSize];
 
-    while (1)
+    while (true)
     {
         sockaddr_in clientAddr{};
         socklen_t clientAddrLen = static_cast<socklen_t>(sizeof(clientAddr));
@@ -57,14 +58,15 @@ int main()
         buffer[recvLen] = '\0';
         char clientIp[INET_ADDRSTRLEN];
 
-        const char* ipResult = inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
-        if (ipResult == nullptr)
+        const char* clientIpResult =
+            inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
+        if (clientIpResult == nullptr)
         {
             spdlog::error("inet_ntop failed: {}", strerror(errno));
             continue;
         }
 
-        int clientPort = ntohs(clientAddr.sin_port);
+        uint16_t clientPort = ntohs(clientAddr.sin_port);
 
         spdlog::info("client[{}:{}] says {}", clientIp, clientPort, buffer);
 

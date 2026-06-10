@@ -5,3 +5,7 @@ compile_commands.json
 *.o
 *.out
 *.exe
+__cmake_systeminformation/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
