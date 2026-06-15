@@ -34,7 +34,7 @@ int main()
 
     if (ipResult == 0)
     {
-        spdlog::error("inet_pton failed ip: {}", serverIp);
+        spdlog::error("invalid IPv4 address format: {}", serverIp);
         close(clientSocket);
         return EXIT_FAILURE;
     }
@@ -48,7 +48,7 @@ int main()
     spdlog::info("UDP client started, server {}:{}", serverIp, serverPort);
 
     constexpr size_t bufferSize = 1024;
-    char buffer[bufferSize];
+    char buffer[bufferSize]{};
     while (true)
     {
         cout << "Please enter the content you want to send: ";

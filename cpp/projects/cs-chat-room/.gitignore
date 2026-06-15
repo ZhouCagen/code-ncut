@@ -1,0 +1,8 @@
+build/
+backend/bin/
+frontend/node_modules/
+frontend/dist/
+*.o
+*.out
+*.log
+.DS_Store
