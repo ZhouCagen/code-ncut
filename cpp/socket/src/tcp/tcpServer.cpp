@@ -81,6 +81,17 @@ int main()
     spdlog::info("TCP server socket created successfully");
 
     int opt = 1;
+    // setsockopt 用来设置 socket 的选项。
+    // 这里设置的是 SO_REUSEADDR，作用是允许服务器程序重启后，尽快重新绑定同一个 IP 和端口。
+    // 如果不设置这个选项，服务器刚关闭后马上重新启动，bind() 可能会因为端口还处于 TIME_WAIT 等状态而失败，
+    // 报错类似：Address already in use。
+
+    // 参数说明：
+    // serverSocket：要设置选项的 socket 文件描述符。
+    // SOL_SOCKET：表示设置的是 socket 通用层级的选项。
+    // SO_REUSEADDR：表示开启地址复用。
+    // &opt：选项值的地址。opt = 1 表示开启，opt = 0 表示关闭。
+    // sizeof(opt)：选项值占用的字节数，setsockopt 需要知道传入数据的大小。
     int setSockOptResult = setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt,
                                       static_cast<socklen_t>(sizeof(opt)));
     if (setSockOptResult == -1)

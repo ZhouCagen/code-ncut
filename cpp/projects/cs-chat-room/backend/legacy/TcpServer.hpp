@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 class TcpServer
 {
@@ -19,7 +20,7 @@ private:
     void bindAddress();
     void listenSocket();
     void acceptLoop();
-    void handleClient(int clientSocket);
+    void handleClient(int clientSocket, std::string clientIp, std::uint16_t clientPort);
 
 private:
     std::uint16_t port_;
