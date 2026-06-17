@@ -1,4 +1,5 @@
 #include "AsyncTcpServer.hpp"
+#include "WebSocket.hpp"
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -246,6 +247,8 @@ void AsyncTcpServer::handleAccept()
         inputBuffers_[clientSocket] = "";
         outputBuffers_[clientSocket] = "";
 
+        clientStates_[clientSocket] = ClientState::HttpHandshake;
+
         addToEpoll(clientSocket, EPOLLIN | EPOLLRDHUP | EPOLLET);
 
         char clientIp[INET_ADDRSTRLEN]{};
@@ -360,34 +363,53 @@ void AsyncTcpServer::processInputBuffer(int clientSocket)
         return;
     }
 
-    std::string& inputBuffer = inputIterator->second;
-    while (true)
+    auto stateIterator = clientStates_.find(clientSocket);
+    if (stateIterator == clientStates_.end())
     {
-        std::size_t newlinePos = inputBuffer.find('\n');
+        spdlog::warn("client state not found for socket {}", clientSocket);
+        return;
+    }
 
-        if (newlinePos == std::string::npos)
-            break;
-
-        std::string message = inputBuffer.substr(0, newlinePos);
-
-        if (!message.empty() && message.back() == '\r')
-            message.pop_back();
-
-        inputBuffer.erase(0, newlinePos + 1);
-
-        onTcpMessage(clientSocket, message);
-
-        if (inputBuffers_.find(clientSocket) == inputBuffers_.end())
+    std::string& inputBuffer = inputIterator->second;
+    if (stateIterator->second == ClientState::HttpHandshake)
+    {
+        if (!WebSocket::hasCompleteHandshakeRequest(inputBuffer))
             return;
+
+        std::size_t headerEnd = inputBuffer.find("\r\n\r\n");
+        if (headerEnd == std::string::npos)
+            return;
+
+        std::string request = inputBuffer.substr(0, headerEnd + 4);
+        try
+        {
+            std::string response = WebSocket::buildHandshakeResponse(request);
+            inputBuffer.erase(0, headerEnd + 4);
+            stateIterator->second = ClientState::WebSocketConnected;
+            queueSend(clientSocket, response);
+            spdlog::info("websocket handshake success, socket {}", clientSocket);
+            return;
+        }
+        catch (const std::exception& error)
+        {
+            spdlog::warn("websocket handshake failed, socket {}, error: {}", clientSocket,
+                         error.what());
+            closeClient(clientSocket);
+            return;
+        }
+    }
+
+    if (stateIterator->second == ClientState::WebSocketConnected)
+    {
+        spdlog::info("websocket frame received from socket {}, frame size {}", clientSocket,
+                     inputBuffer.size());
+        return;
     }
 }
 
 void AsyncTcpServer::onTcpMessage(int clientSocket, const std::string& message)
 {
     spdlog::info("received from socket {} : {}", clientSocket, message);
-
-    std::string response = "server received: " + message + "\n";
-    queueSend(clientSocket, response);
 }
 
 void AsyncTcpServer::queueSend(int clientSocket, const std::string& data)
@@ -419,6 +441,7 @@ void AsyncTcpServer::closeClient(int clientSocket)
         return;
     inputBuffers_.erase(clientSocket);
     outputBuffers_.erase(clientSocket);
+    clientStates_.erase(clientSocket);
 
     if (epollInstance_ != -1)
         removeFromEpoll(clientSocket);

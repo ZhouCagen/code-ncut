@@ -43,6 +43,13 @@ private:
     int listenSocket_{-1};
     int epollInstance_{-1};
 
+    enum class ClientState
+    {
+        HttpHandshake,
+        WebSocketConnected
+    };
+
     std::unordered_map<int, std::string> inputBuffers_;
     std::unordered_map<int, std::string> outputBuffers_;
+    std::unordered_map<int, ClientState> clientStates_;
 };
