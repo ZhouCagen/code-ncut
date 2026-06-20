@@ -18,7 +18,6 @@ add_executable(chat_server
     backend/src/ChatServer.cpp
     backend/src/Database.cpp
     backend/src/UserRepository.cpp
-    backend/src/GroupRepository.cpp
     backend/src/PasswordHasher.cpp
 )
 

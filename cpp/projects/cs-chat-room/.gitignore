@@ -1,8 +1,21 @@
+# build
 build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# executable output
 backend/bin/
-frontend/node_modules/
-frontend/dist/
-*.o
 *.out
-*.log
+
+# sqlite database
+*.db
+*.db-shm
+*.db-wal
+
+# system/editor
 .DS_Store
+.vscode/
+.idea/
