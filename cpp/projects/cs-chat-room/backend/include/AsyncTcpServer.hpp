@@ -1,22 +1,30 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <unordered_map>
 
 class AsyncTcpServer
 {
-public:
+  public:
     explicit AsyncTcpServer(std::uint16_t port);
     ~AsyncTcpServer();
 
-    AsyncTcpServer(const AsyncTcpServer&) = delete;
-    AsyncTcpServer& operator=(const AsyncTcpServer&) = delete;
+    AsyncTcpServer(const AsyncTcpServer &) = delete;
+    AsyncTcpServer &operator=(const AsyncTcpServer &) = delete;
 
     void start();
     void eventLoop();
 
-private:
+    void setClientConnectedCallback(std::function<void(int)> callback);
+    void setClientDisconnectedCallback(std::function<void(int)> callback);
+    void setInputBufferCallback(std::function<void(int, std::string &)> callback);
+
+    void enqueueWrite(int clientSocket, const std::string &data);
+    void closeClient(int clientSocket);
+
+  private:
     void createSocket();
     void setReuseAddress();
     void setNonBlocking(int socketFd);
@@ -33,23 +41,16 @@ private:
     void handleWrite(int clientSocket);
 
     void processInputBuffer(int clientSocket);
-    void onTcpMessage(int clientSocket, const std::string& message);
 
-    void queueSend(int clientSocket, const std::string& data);
-    void closeClient(int clientSocket);
-
-private:
+  private:
     std::uint16_t port_{};
     int listenSocket_{-1};
     int epollInstance_{-1};
 
-    enum class ClientState
-    {
-        HttpHandshake,
-        WebSocketConnected
-    };
-
     std::unordered_map<int, std::string> inputBuffers_;
     std::unordered_map<int, std::string> outputBuffers_;
-    std::unordered_map<int, ClientState> clientStates_;
+
+    std::function<void(int)> clientConnectedCallback_;
+    std::function<void(int)> clientDisconnectedCallback_;
+    std::function<void(int, std::string &)> inputBufferCallback_;
 };

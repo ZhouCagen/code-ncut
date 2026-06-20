@@ -1,5 +1,4 @@
 #include "AsyncTcpServer.hpp"
-#include "WebSocket.hpp"
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -15,17 +14,18 @@
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace
 {
-    constexpr int maxEpollEvents = 64;
-    constexpr std::size_t bufferSize = 1024;
-    constexpr std::size_t maxMessageSize = 64 * 1024;
+constexpr int maxEpollEvents = 64;
+constexpr std::size_t bufferSize = 1024;
+constexpr std::size_t maxMessageSize = 64 * 1024;
 
-    std::runtime_error makeSystemError(const std::string& message)
-    {
-        return std::runtime_error(message + ": " + std::strerror(errno));
-    }
+std::runtime_error makeSystemError(const std::string &message)
+{
+    return std::runtime_error(message + ": " + std::strerror(errno));
+}
 } // namespace
 
 AsyncTcpServer::AsyncTcpServer(std::uint16_t port) : port_(port)
@@ -33,7 +33,7 @@ AsyncTcpServer::AsyncTcpServer(std::uint16_t port) : port_(port)
 }
 AsyncTcpServer::~AsyncTcpServer()
 {
-    for (const auto& pair : inputBuffers_)
+    for (const auto &pair : inputBuffers_)
         ::close(pair.first);
 
     inputBuffers_.clear();
@@ -112,6 +112,72 @@ void AsyncTcpServer::eventLoop()
     }
 }
 
+void AsyncTcpServer::setClientConnectedCallback(std::function<void(int)> callback)
+{
+    clientConnectedCallback_ = std::move(callback);
+}
+
+void AsyncTcpServer::setClientDisconnectedCallback(std::function<void(int)> callback)
+{
+    clientDisconnectedCallback_ = std::move(callback);
+}
+
+void AsyncTcpServer::setInputBufferCallback(std::function<void(int, std::string &)> callback)
+{
+    inputBufferCallback_ = std::move(callback);
+}
+
+void AsyncTcpServer::enqueueWrite(int clientSocket, const std::string &data)
+{
+    if (data.empty())
+        return;
+
+    auto outputIterator = outputBuffers_.find(clientSocket);
+    if (outputIterator == outputBuffers_.end())
+    {
+        spdlog::warn("output buffer not found for socket {}", clientSocket);
+        return;
+    }
+
+    if (outputIterator->second.size() + data.size() > maxMessageSize)
+    {
+        spdlog::warn("client socket {} message too large", clientSocket);
+        closeClient(clientSocket);
+        return;
+    }
+
+    outputIterator->second.append(data);
+
+    modifyEpoll(clientSocket, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLET);
+}
+
+void AsyncTcpServer::closeClient(int clientSocket)
+{
+    if (clientSocket == -1)
+        return;
+
+    bool knownClient = inputBuffers_.find(clientSocket) != inputBuffers_.end() ||
+                       outputBuffers_.find(clientSocket) != outputBuffers_.end();
+
+    if (knownClient && clientDisconnectedCallback_)
+        clientDisconnectedCallback_(clientSocket);
+
+    inputBuffers_.erase(clientSocket);
+    outputBuffers_.erase(clientSocket);
+
+    if (epollInstance_ != -1)
+        removeFromEpoll(clientSocket);
+
+    int closeResult = ::close(clientSocket);
+    if (closeResult == -1)
+    {
+        spdlog::warn("close failed for socket {}: {}", clientSocket, std::strerror(errno));
+        return;
+    }
+
+    spdlog::info("client socket {} closed successfully", clientSocket);
+}
+
 void AsyncTcpServer::createSocket()
 {
     listenSocket_ = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -135,10 +201,12 @@ void AsyncTcpServer::setReuseAddress()
 void AsyncTcpServer::setNonBlocking(int socketFd)
 {
     int currentFlags = ::fcntl(socketFd, F_GETFL, 0);
+    // 获取这个 fd 当前的状态标志
     if (currentFlags == -1)
         throw makeSystemError("fcntl F_GETFL failed");
 
     int setResult = ::fcntl(socketFd, F_SETFL, currentFlags | O_NONBLOCK);
+    // 设置这个 fd 的状态标志
     if (setResult == -1)
         throw makeSystemError("fcntl F_SETFL O_NONBLOCK failed");
 }
@@ -150,7 +218,7 @@ void AsyncTcpServer::bindAddress()
     serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     serverAddr.sin_port = htons(port_);
 
-    int bindResult = ::bind(listenSocket_, reinterpret_cast<sockaddr*>(&serverAddr),
+    int bindResult = ::bind(listenSocket_, reinterpret_cast<sockaddr *>(&serverAddr),
                             static_cast<socklen_t>(sizeof(serverAddr)));
 
     if (bindResult == -1)
@@ -171,8 +239,8 @@ void AsyncTcpServer::listenOnSocket()
 
 void AsyncTcpServer::createEpoll()
 {
-    epollInstance_ =
-        ::epoll_create1(EPOLL_CLOEXEC); // 给这个 epoll 文件描述符设置 close-on-exec 标志
+    epollInstance_ = ::epoll_create1(EPOLL_CLOEXEC);
+    // 给这个 epoll 文件描述符设置 close-on-exec 标志
 
     if (epollInstance_ == -1)
         throw makeSystemError("epoll_create1 failed");
@@ -230,7 +298,7 @@ void AsyncTcpServer::handleAccept()
         sockaddr_in clientAddr{};
         socklen_t clientLen = sizeof(clientAddr);
         int clientSocket =
-            ::accept(listenSocket_, reinterpret_cast<sockaddr*>(&clientAddr), &clientLen);
+            ::accept(listenSocket_, reinterpret_cast<sockaddr *>(&clientAddr), &clientLen);
         if (clientSocket == -1)
         {
             if (errno == EAGAIN || errno == EWOULDBLOCK) // 现在没东西了，或者现在做不了，等下再试
@@ -247,12 +315,16 @@ void AsyncTcpServer::handleAccept()
         inputBuffers_[clientSocket] = "";
         outputBuffers_[clientSocket] = "";
 
-        clientStates_[clientSocket] = ClientState::HttpHandshake;
-
         addToEpoll(clientSocket, EPOLLIN | EPOLLRDHUP | EPOLLET);
+        // 默认 epoll 是 LT 模式，也就是水平触发 EPOLLET 以后，就是 ET 模式
+        // ET：只在状态变化那一刻提醒你一次
+        // LT: 只要有数据就提醒你
+
+        if (clientConnectedCallback_)
+            clientConnectedCallback_(clientSocket);
 
         char clientIp[INET_ADDRSTRLEN]{};
-        const char* ipResult =
+        const char *ipResult =
             ::inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
         if (ipResult == nullptr)
             throw makeSystemError("inet_ntop failed");
@@ -319,14 +391,14 @@ void AsyncTcpServer::handleWrite(int clientSocket)
         return;
     }
 
-    std::string& outputBuffer = outputIterator->second;
+    std::string &outputBuffer = outputIterator->second;
 
     while (!outputBuffer.empty())
     {
         ssize_t sendLen =
             ::send(clientSocket, outputBuffer.data(), outputBuffer.size(), MSG_NOSIGNAL);
         // 客户端 close 了 服务器还 send 进程发一个信号 SIGPIPE 直接终止整个程序
-
+        // 防止服务器因为给已断开的客户端 send 而被 SIGPIPE 信号干死
         if (sendLen > 0)
         {
             outputBuffer.erase(0, static_cast<size_t>(sendLen));
@@ -336,7 +408,7 @@ void AsyncTcpServer::handleWrite(int clientSocket)
         if (sendLen == 0)
             break;
 
-        if (errno == EAGAIN || errno == EWOULDBLOCK)
+        if (errno == EAGAIN || errno == EWOULDBLOCK) // socket 发送缓冲区暂时满了
         {
             modifyEpoll(clientSocket, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLET);
             return;
@@ -363,95 +435,17 @@ void AsyncTcpServer::processInputBuffer(int clientSocket)
         return;
     }
 
-    auto stateIterator = clientStates_.find(clientSocket);
-    if (stateIterator == clientStates_.end())
-    {
-        spdlog::warn("client state not found for socket {}", clientSocket);
-        return;
-    }
-
-    std::string& inputBuffer = inputIterator->second;
-    if (stateIterator->second == ClientState::HttpHandshake)
-    {
-        if (!WebSocket::hasCompleteHandshakeRequest(inputBuffer))
-            return;
-
-        std::size_t headerEnd = inputBuffer.find("\r\n\r\n");
-        if (headerEnd == std::string::npos)
-            return;
-
-        std::string request = inputBuffer.substr(0, headerEnd + 4);
-        try
-        {
-            std::string response = WebSocket::buildHandshakeResponse(request);
-            inputBuffer.erase(0, headerEnd + 4);
-            stateIterator->second = ClientState::WebSocketConnected;
-            queueSend(clientSocket, response);
-            spdlog::info("websocket handshake success, socket {}", clientSocket);
-            return;
-        }
-        catch (const std::exception& error)
-        {
-            spdlog::warn("websocket handshake failed, socket {}, error: {}", clientSocket,
-                         error.what());
-            closeClient(clientSocket);
-            return;
-        }
-    }
-
-    if (stateIterator->second == ClientState::WebSocketConnected)
-    {
-        spdlog::info("websocket frame received from socket {}, frame size {}", clientSocket,
-                     inputBuffer.size());
-        return;
-    }
-}
-
-void AsyncTcpServer::onTcpMessage(int clientSocket, const std::string& message)
-{
-    spdlog::info("received from socket {} : {}", clientSocket, message);
-}
-
-void AsyncTcpServer::queueSend(int clientSocket, const std::string& data)
-{
-    if (data.empty())
+    if (!inputBufferCallback_)
         return;
 
-    auto outputIterator = outputBuffers_.find(clientSocket);
-    if (outputIterator == outputBuffers_.end())
+    try
     {
-        spdlog::warn("output buffer not found for socket {}", clientSocket);
-        return;
+        inputBufferCallback_(clientSocket, inputIterator->second);
     }
-
-    if (outputIterator->second.size() + data.size() > maxMessageSize)
+    catch (const std::exception &error)
     {
-        spdlog::warn("client socket {} message too large", clientSocket);
+        spdlog::warn("input buffer callback failed, socket {}, error: {}", clientSocket,
+                     error.what());
         closeClient(clientSocket);
-        return;
     }
-
-    outputIterator->second.append(data);
-
-    modifyEpoll(clientSocket, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLET);
-}
-void AsyncTcpServer::closeClient(int clientSocket)
-{
-    if (clientSocket == -1)
-        return;
-    inputBuffers_.erase(clientSocket);
-    outputBuffers_.erase(clientSocket);
-    clientStates_.erase(clientSocket);
-
-    if (epollInstance_ != -1)
-        removeFromEpoll(clientSocket);
-
-    int closeResult = ::close(clientSocket);
-    if (closeResult == -1)
-    {
-        spdlog::warn("close failed for socket {}: {}", clientSocket, std::strerror(errno));
-        return;
-    }
-
-    spdlog::info("client socket {} closed successfully", clientSocket);
 }
