@@ -1,0 +1,119 @@
+@{
+    ViewData["Title"] = "系统管理员首页";
+
+    var colleges = ViewBag.Colleges as DataTable;
+    var users = ViewBag.Users as List<User> ?? new List<User>();
+    var students = ViewBag.Students as List<Student> ?? new List<Student>();
+    var teachers = ViewBag.Teachers as List<Teacher> ?? new List<Teacher>();
+    var courses = ViewBag.Courses as List<Course> ?? new List<Course>();
+}
+
+<section class="page-title">
+    <h1>系统管理员首页</h1>
+    <p>管理学院、账号，并查看系统总体数据。</p>
+</section>
+
+<section class="card" id="colleges">
+    <div class="card-head">
+        <h2>学院管理</h2>
+    </div>
+
+    <form class="inline-form" asp-action="AddCollege" method="post">
+        <input name="collegeId" placeholder="学院编号" />
+        <input name="collegeName" placeholder="学院名称" />
+        <button type="submit">添加学院</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>学院编号</th>
+                <th>学院名称</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (colleges != null)
+            {
+                foreach (DataRow row in colleges.Rows)
+                {
+                    <tr>
+                        <td>@row["COLLEGEID"]</td>
+                        <td>@row["COLLEGENAME"]</td>
+                        <td>
+                            <form asp-action="DeleteCollege" method="post">
+                                <input type="hidden" name="collegeId" value="@row["COLLEGEID"]" />
+                                <button type="submit">删除</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="users">
+    <div class="card-head">
+        <h2>账号管理</h2>
+    </div>
+
+    <form class="inline-form" asp-action="AddUser" method="post">
+        <input name="userId" placeholder="用户ID，例如 U001" />
+        <input name="account" placeholder="账号" />
+        <input name="password" placeholder="密码" />
+        <select name="role">
+            <option value="SystemAdmin">系统管理员</option>
+            <option value="CollegeAdmin">学院管理员</option>
+            <option value="Teacher">教师</option>
+            <option value="Student">学生</option>
+        </select>
+        <input name="relatedId" placeholder="关联ID：学生SNO/教师TNO" />
+        <input name="collegeId" placeholder="学院ID" />
+        <button type="submit">添加账号</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>用户ID</th>
+                <th>账号</th>
+                <th>角色</th>
+                <th>关联ID</th>
+                <th>学院ID</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.USERID</td>
+                    <td>@user.ACCOUNT</td>
+                    <td>@user.ROLE</td>
+                    <td>@user.RELATEDID</td>
+                    <td>@user.COLLEGEID</td>
+                    <td>
+                        <form asp-action="DeleteUser" method="post">
+                            <input type="hidden" name="userId" value="@user.USERID" />
+                            <button type="submit">删除</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="overview">
+    <div class="card-head">
+        <h2>系统总览</h2>
+    </div>
+
+    <div class="stats">
+        <div>学生总数：@students.Count</div>
+        <div>教师总数：@teachers.Count</div>
+        <div>课程总数：@courses.Count</div>
+        <div>账号总数：@users.Count</div>
+    </div>
+</section>

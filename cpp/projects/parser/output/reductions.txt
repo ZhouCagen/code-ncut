@@ -1,0 +1,32 @@
+Reduction sequence:
+17. Factor -> Constant
+6. Assignment -> Identifier = ArithmeticExpression
+1. Statement -> Assignment
+17. Factor -> Constant
+17. Factor -> Constant
+17. Factor -> Constant
+11. ArithmeticExpression -> ArithmeticExpression + Term
+18. Factor -> ( ArithmeticExpression )
+13. Term -> Term * Factor
+6. Assignment -> Identifier = ArithmeticExpression
+5. LabeledAssignment -> Label : Assignment
+4. Statement -> LabeledAssignment
+16. Factor -> Identifier
+17. Factor -> Constant
+10. BoolExpression -> ArithmeticExpression Relop ArithmeticExpression
+17. Factor -> Constant
+6. Assignment -> Identifier = ArithmeticExpression
+1. Statement -> Assignment
+16. Factor -> Identifier
+17. Factor -> Constant
+10. BoolExpression -> ArithmeticExpression Relop ArithmeticExpression
+17. Factor -> Constant
+6. Assignment -> Identifier = ArithmeticExpression
+1. Statement -> Assignment
+9. GotoStatement -> GOTO Label
+3. Statement -> GotoStatement
+8. IfStatement -> IF BoolExpression THEN Statement ELSE Statement
+2. Statement -> IfStatement
+8. IfStatement -> IF BoolExpression THEN Statement ELSE Statement
+2. Statement -> IfStatement
+0. Program -> StatementList #

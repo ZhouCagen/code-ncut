@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+**/wwwroot/lib/
+**/.vs/
+**/*.user
+**/*.sln
+**/*.slnx
+**/*.csproj
+**/appsettings*.json
+**/Properties/
+**/Views/Home/
+**/Views/Shared/Error.cshtml
+**/Views/Shared/_ValidationScriptsPartial.cshtml
+**/Views/Shared/_Layout.cshtml.css
+**/Models/ErrorViewModel.cs
+**/Controllers/HomeController.cs

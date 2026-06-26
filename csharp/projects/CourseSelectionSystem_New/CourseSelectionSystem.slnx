@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CourseSelectionSystem.Core/CourseSelectionSystem.Core.csproj" />
+  <Project Path="CourseSelectionSystem.Web/CourseSelectionSystem.Web.csproj" />
+</Solution>

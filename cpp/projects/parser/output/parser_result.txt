@@ -1,0 +1,2 @@
+Syntax analysis succeeded.
+Reduction count: 31

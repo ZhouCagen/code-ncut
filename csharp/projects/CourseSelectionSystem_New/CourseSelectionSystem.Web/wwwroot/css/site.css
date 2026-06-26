@@ -1,0 +1,282 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, "Microsoft YaHei", sans-serif;
+  color: #2b2b35;
+  background: #f7f5fb;
+}
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 230px;
+  background: #ffffff;
+  border-right: 1px solid #eee8f5;
+  padding: 24px 18px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 20px;
+  color: #7b2cbf;
+  margin-bottom: 32px;
+}
+
+.nav-item {
+  display: block;
+  padding: 12px 14px;
+  color: #5d5668;
+  text-decoration: none;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.nav-item:hover {
+  background: #f1e7ff;
+  color: #7b2cbf;
+}
+
+.nav-item.danger {
+  color: #c1121f;
+  margin-top: 36px;
+}
+
+.main {
+  flex: 1;
+  padding: 0 28px 40px;
+  min-width: 0;
+}
+
+.topbar {
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search {
+  width: 360px;
+  border: none;
+  outline: none;
+  background: #ffffff;
+  padding: 14px 18px;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(85, 50, 130, 0.06);
+}
+
+.user-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  box-shadow: 0 8px 24px rgba(85, 50, 130, 0.06);
+}
+
+.user-box span {
+  font-weight: 700;
+}
+
+.user-box small {
+  color: #7b7285;
+}
+
+.page-title {
+  margin: 8px 0 24px;
+}
+
+.page-title h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.page-title p {
+  margin: 0;
+  color: #7b7285;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 22px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 30px rgba(85, 50, 130, 0.07);
+  overflow-x: auto;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.card-head h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.card-head span {
+  color: #7b2cbf;
+  font-weight: 700;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+th {
+  background: #faf7ff;
+  color: #7b7285;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: left;
+  padding: 14px;
+}
+
+td {
+  border-bottom: 1px solid #f0edf6;
+  padding: 14px;
+  font-size: 14px;
+}
+
+tr:hover td {
+  background: #fcfaff;
+}
+
+button,
+.btn {
+  border: none;
+  background: #7b2cbf;
+  color: #ffffff;
+  padding: 9px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+button:hover,
+.btn:hover {
+  background: #5f1b99;
+}
+
+.btn.light {
+  background: #efe4ff;
+  color: #7b2cbf;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inline-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.inline-form input,
+.inline-form select {
+  border: 1px solid #eee8f5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  min-width: 140px;
+  outline: none;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #5d5668;
+}
+
+.alert {
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  font-weight: 700;
+}
+
+.alert.success {
+  background: #e8fff1;
+  color: #15803d;
+}
+
+.alert.error {
+  background: #ffe8e8;
+  color: #b91c1c;
+}
+
+.stats {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.stats div {
+  background: #faf7ff;
+  color: #5d5668;
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-weight: 700;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f3e7ff, #ffffff);
+}
+
+.login-card {
+  width: 360px;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 32px;
+  box-shadow: 0 16px 40px rgba(85, 50, 130, 0.12);
+}
+
+.login-card h1 {
+  margin: 0 0 24px;
+  color: #7b2cbf;
+}
+
+.login-card label {
+  display: block;
+  margin: 14px 0 8px;
+  font-weight: 700;
+}
+
+.login-card input {
+  width: 100%;
+  border: 1px solid #eee8f5;
+  border-radius: 12px;
+  padding: 12px 14px;
+  outline: none;
+}
+
+.login-card button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 13px;
+}

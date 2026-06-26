@@ -1,0 +1,12 @@
+/* test lexer */
+100: IF A >= 10 THEN GOTO 200;
+A = 123 + 45 * 6;
+B = A - 20;
+IF B <= 300 THEN GOTO 300;
+IF A <> B THEN C = A ^ 2;
+D = 1 + \
+2 + \
+3;
+200: C = B / 2;
+300: ELSE GOTO 100;
+#

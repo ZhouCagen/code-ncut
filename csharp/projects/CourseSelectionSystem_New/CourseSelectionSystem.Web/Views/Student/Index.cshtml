@@ -1,0 +1,206 @@
+@{
+    ViewData["Title"] = "学生首页";
+
+    var openCourses = ViewBag.OpenCourses as List<Course> ?? new List<Course>();
+    var mySelections = ViewBag.MySelections as DataTable;
+    var myScores = ViewBag.MyScores as DataTable;
+    var coursewares = ViewBag.Coursewares as List<Courseware> ?? new List<Courseware>();
+    var users = ViewBag.Users as List<User> ?? new List<User>();
+    var messages = ViewBag.Messages as DataTable;
+}
+
+<section class="page-title">
+    <h1>学生首页</h1>
+    <p>选课、查询选课结果、查看成绩、查看课件、留言。</p>
+</section>
+
+<section class="card" id="courses">
+    <div class="card-head">
+        <h2>开放课程</h2>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>课程号</th>
+                <th>课程名</th>
+                <th>学时</th>
+                <th>学分</th>
+                <th>容量</th>
+                <th>介绍</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in openCourses)
+            {
+                <tr>
+                    <td>@course.CNO</td>
+                    <td>@course.CNAME</td>
+                    <td>@course.CTIME</td>
+                    <td>@course.CCREDIT</td>
+                    <td>@course.CAPACITY</td>
+                    <td>@course.INTRODUCTION</td>
+                    <td class="actions">
+                        <form asp-action="SelectCourse" method="post">
+                            <input type="hidden" name="cno" value="@course.CNO" />
+                            <button type="submit">选课</button>
+                        </form>
+
+                        <a class="btn light" asp-action="Index" asp-route-coursewareCno="@course.CNO">看课件</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="selections">
+    <div class="card-head">
+        <h2>我的选课</h2>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>课程号</th>
+                <th>课程名</th>
+                <th>学分</th>
+                <th>学时</th>
+                <th>状态</th>
+                <th>时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (mySelections != null)
+            {
+                foreach (DataRow row in mySelections.Rows)
+                {
+                    <tr>
+                        <td>@row["CNO"]</td>
+                        <td>@row["CNAME"]</td>
+                        <td>@row["CCREDIT"]</td>
+                        <td>@row["CTIME"]</td>
+                        <td>@row["STATUS"]</td>
+                        <td>@row["SELECTEDAT"]</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="scores">
+    <div class="card-head">
+        <h2>我的成绩</h2>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>课程号</th>
+                <th>课程名</th>
+                <th>学分</th>
+                <th>成绩</th>
+                <th>录入时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (myScores != null)
+            {
+                foreach (DataRow row in myScores.Rows)
+                {
+                    <tr>
+                        <td>@row["CNO"]</td>
+                        <td>@row["CNAME"]</td>
+                        <td>@row["CCREDIT"]</td>
+                        <td>@row["GRADE"]</td>
+                        <td>@row["RECORDEDAT"]</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="coursewares">
+    <div class="card-head">
+        <h2>课件</h2>
+        <span>@ViewBag.SelectedCoursewareCno</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>课程号</th>
+                <th>文件名</th>
+                <th>路径</th>
+                <th>上传教师</th>
+                <th>上传时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in coursewares)
+            {
+                <tr>
+                    <td>@item.CNO</td>
+                    <td>@item.FILENAME</td>
+                    <td>@item.FILEPATH</td>
+                    <td>@item.UPLOADEDBY</td>
+                    <td>@item.UPLOADEDAT</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="messages">
+    <div class="card-head">
+        <h2>留言</h2>
+    </div>
+
+    <form class="inline-form" asp-action="SendMessage" method="post">
+        <select name="toUserId">
+            @foreach (var user in users)
+            {
+                <option value="@user.USERID">@user.ACCOUNT - @user.ROLE</option>
+            }
+        </select>
+        <input name="content" placeholder="留言内容" />
+        <button type="submit">发送</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>发送人</th>
+                <th>接收人</th>
+                <th>内容</th>
+                <th>时间</th>
+                <th>已读</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (messages != null)
+            {
+                foreach (DataRow row in messages.Rows)
+                {
+                    <tr>
+                        <td>@row["FROMUSERID"]</td>
+                        <td>@row["TOUSERID"]</td>
+                        <td>@row["CONTENT"]</td>
+                        <td>@row["CREATEDAT"]</td>
+                        <td>@row["ISREAD"]</td>
+                        <td>
+                            <form asp-action="MarkMessageRead" method="post">
+                                <input type="hidden" name="messageId" value="@row["ID"]" />
+                                <button type="submit">已读</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>

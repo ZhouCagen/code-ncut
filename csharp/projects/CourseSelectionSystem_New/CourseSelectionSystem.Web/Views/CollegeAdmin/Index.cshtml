@@ -1,0 +1,212 @@
+@{
+    ViewData["Title"] = "学院管理员首页";
+
+    var students = ViewBag.Students as List<Student> ?? new List<Student>();
+    var teachers = ViewBag.Teachers as List<Teacher> ?? new List<Teacher>();
+    var courses = ViewBag.Courses as List<Course> ?? new List<Course>();
+    var users = ViewBag.Users as List<User> ?? new List<User>();
+    var messages = ViewBag.Messages as DataTable;
+}
+
+<section class="page-title">
+    <h1>学院管理员首页</h1>
+    <p>管理本学院学生、教师、课程，并对课程进行抽签。</p>
+</section>
+
+<section class="card" id="students">
+    <div class="card-head">
+        <h2>学生管理</h2>
+    </div>
+
+    <form class="inline-form" asp-action="AddStudent" method="post">
+        <input name="SNO" placeholder="学号" />
+        <input name="SNAME" placeholder="姓名" />
+        <input name="SSEX" placeholder="性别" />
+        <input name="SAGE" type="number" placeholder="年龄" />
+        <input name="SDEPT" placeholder="专业" />
+        <button type="submit">添加学生</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>学号</th>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>年龄</th>
+                <th>专业</th>
+                <th>学院</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in students)
+            {
+                <tr>
+                    <td>@student.SNO</td>
+                    <td>@student.SNAME</td>
+                    <td>@student.SSEX</td>
+                    <td>@student.SAGE</td>
+                    <td>@student.SDEPT</td>
+                    <td>@student.COLLEGEID</td>
+                    <td>
+                        <form asp-action="DeleteStudent" method="post">
+                            <input type="hidden" name="sno" value="@student.SNO" />
+                            <button type="submit">删除</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="teachers">
+    <div class="card-head">
+        <h2>教师管理</h2>
+    </div>
+
+    <form class="inline-form" asp-action="AddTeacher" method="post">
+        <input name="TNO" placeholder="教师号" />
+        <input name="TNAME" placeholder="姓名" />
+        <input name="TSEX" placeholder="性别" />
+        <input name="TDEPT" placeholder="系别" />
+        <button type="submit">添加教师</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>教师号</th>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>系别</th>
+                <th>学院</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var teacher in teachers)
+            {
+                <tr>
+                    <td>@teacher.TNO</td>
+                    <td>@teacher.TNAME</td>
+                    <td>@teacher.TSEX</td>
+                    <td>@teacher.TDEPT</td>
+                    <td>@teacher.COLLEGEID</td>
+                    <td>
+                        <form asp-action="DeleteTeacher" method="post">
+                            <input type="hidden" name="tno" value="@teacher.TNO" />
+                            <button type="submit">删除</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="courses">
+    <div class="card-head">
+        <h2>课程管理</h2>
+    </div>
+
+    <form class="inline-form" asp-action="AddCourse" method="post">
+        <input name="CNO" placeholder="课程号" />
+        <input name="CNAME" placeholder="课程名" />
+        <input name="CTIME" type="number" placeholder="学时" />
+        <input name="CCREDIT" type="number" step="0.1" placeholder="学分" />
+        <input name="TNO" placeholder="教师号" />
+        <input name="CAPACITY" type="number" placeholder="容量" />
+        <input name="INTRODUCTION" placeholder="介绍" />
+        <label class="checkbox">
+            <input type="checkbox" name="ISOPEN" value="true" />
+            开放
+        </label>
+        <button type="submit">添加课程</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>课程号</th>
+                <th>课程名</th>
+                <th>教师号</th>
+                <th>学分</th>
+                <th>容量</th>
+                <th>开放</th>
+                <th>抽签</th>
+                <th>删除</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in courses)
+            {
+                <tr>
+                    <td>@course.CNO</td>
+                    <td>@course.CNAME</td>
+                    <td>@course.TNO</td>
+                    <td>@course.CCREDIT</td>
+                    <td>@course.CAPACITY</td>
+                    <td>@course.ISOPEN</td>
+                    <td>
+                        <form asp-action="DrawLots" method="post">
+                            <input type="hidden" name="cno" value="@course.CNO" />
+                            <button type="submit">抽签</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form asp-action="DeleteCourse" method="post">
+                            <input type="hidden" name="cno" value="@course.CNO" />
+                            <button type="submit">删除</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="messages">
+    <div class="card-head">
+        <h2>留言</h2>
+    </div>
+
+    <form class="inline-form" asp-action="SendMessage" method="post">
+        <select name="toUserId">
+            @foreach (var user in users)
+            {
+                <option value="@user.USERID">@user.ACCOUNT - @user.ROLE</option>
+            }
+        </select>
+        <input name="content" placeholder="留言内容" />
+        <button type="submit">发送</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>发送人</th>
+                <th>接收人</th>
+                <th>内容</th>
+                <th>时间</th>
+                <th>已读</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (messages != null)
+            {
+                foreach (DataRow row in messages.Rows)
+                {
+                    <tr>
+                        <td>@row["FROMUSERID"]</td>
+                        <td>@row["TOUSERID"]</td>
+                        <td>@row["CONTENT"]</td>
+                        <td>@row["CREATEDAT"]</td>
+                        <td>@row["ISREAD"]</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>

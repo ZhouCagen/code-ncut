@@ -1,0 +1,223 @@
+@{
+    ViewData["Title"] = "教师首页";
+
+    var courses = ViewBag.MyCourses as List<Course> ?? new List<Course>();
+    var wonStudents = ViewBag.WonStudents as DataTable;
+    var coursewares = ViewBag.Coursewares as List<Courseware> ?? new List<Courseware>();
+    var statistics = ViewBag.ScoreStatistics as ScoreStatistics;
+    var users = ViewBag.Users as List<User> ?? new List<User>();
+    var messages = ViewBag.Messages as DataTable;
+    string? selectedCno = ViewBag.SelectedCno as string;
+}
+
+<section class="page-title">
+    <h1>教师首页</h1>
+    <p>课程发布、课程介绍、查看中签学生、录入成绩、上传课件、留言。</p>
+</section>
+
+<section class="card" id="courses">
+    <div class="card-head">
+        <h2>我的课程</h2>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>课程号</th>
+                <th>课程名</th>
+                <th>学时</th>
+                <th>学分</th>
+                <th>容量</th>
+                <th>开放</th>
+                <th>介绍</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in courses)
+            {
+                <tr>
+                    <td>@course.CNO</td>
+                    <td>@course.CNAME</td>
+                    <td>@course.CTIME</td>
+                    <td>@course.CCREDIT</td>
+                    <td>@course.CAPACITY</td>
+                    <td>@course.ISOPEN</td>
+                    <td>@course.INTRODUCTION</td>
+                    <td class="actions">
+                        <a class="btn light" asp-action="Index" asp-route-cno="@course.CNO">管理</a>
+
+                        <form asp-action="PublishCourse" method="post">
+                            <input type="hidden" name="cno" value="@course.CNO" />
+                            <button type="submit">发布</button>
+                        </form>
+
+                        <form asp-action="CloseCourse" method="post">
+                            <input type="hidden" name="cno" value="@course.CNO" />
+                            <button type="submit">关闭</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!string.IsNullOrWhiteSpace(selectedCno))
+    {
+        <form class="inline-form" asp-action="UpdateIntroduction" method="post">
+            <input type="hidden" name="cno" value="@selectedCno" />
+            <input name="introduction" placeholder="修改 @selectedCno 的课程介绍" />
+            <button type="submit">更新介绍</button>
+        </form>
+    }
+</section>
+
+<section class="card" id="students">
+    <div class="card-head">
+        <h2>中签学生</h2>
+        <span>@selectedCno</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>学号</th>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>专业</th>
+                <th>课程号</th>
+                <th>课程名</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (wonStudents != null)
+            {
+                foreach (DataRow row in wonStudents.Rows)
+                {
+                    <tr>
+                        <td>@row["SNO"]</td>
+                        <td>@row["SNAME"]</td>
+                        <td>@row["SSEX"]</td>
+                        <td>@row["SDEPT"]</td>
+                        <td>@row["CNO"]</td>
+                        <td>@row["CNAME"]</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="scores">
+    <div class="card-head">
+        <h2>成绩管理</h2>
+    </div>
+
+    @if (statistics != null)
+    {
+        <div class="stats">
+            <div>总人数：@statistics.TotalCount</div>
+            <div>优秀：@statistics.ExcellentCount</div>
+            <div>良好：@statistics.GoodCount</div>
+            <div>中等：@statistics.MediumCount</div>
+            <div>及格：@statistics.PassCount</div>
+            <div>不及格：@statistics.FailCount</div>
+            <div>及格率：@statistics.PassRate%</div>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(selectedCno))
+    {
+        <form class="inline-form" asp-action="RecordScore" method="post">
+            <input type="hidden" name="cno" value="@selectedCno" />
+            <input name="sno" placeholder="学号" />
+            <input name="grade" type="number" placeholder="成绩" />
+            <button type="submit">录入成绩</button>
+        </form>
+    }
+</section>
+
+<section class="card" id="coursewares">
+    <div class="card-head">
+        <h2>课件管理</h2>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(selectedCno))
+    {
+        <form class="inline-form" asp-action="AddCourseware" method="post">
+            <input type="hidden" name="cno" value="@selectedCno" />
+            <input name="fileName" placeholder="文件名，例如 chapter01.pdf" />
+            <input name="filePath" placeholder="文件路径，例如 /uploads/chapter01.pdf" />
+            <button type="submit">添加课件</button>
+        </form>
+    }
+
+    <table>
+        <thead>
+            <tr>
+                <th>课程号</th>
+                <th>文件名</th>
+                <th>路径</th>
+                <th>上传人</th>
+                <th>时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in coursewares)
+            {
+                <tr>
+                    <td>@item.CNO</td>
+                    <td>@item.FILENAME</td>
+                    <td>@item.FILEPATH</td>
+                    <td>@item.UPLOADEDBY</td>
+                    <td>@item.UPLOADEDAT</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<section class="card" id="messages">
+    <div class="card-head">
+        <h2>留言</h2>
+    </div>
+
+    <form class="inline-form" asp-action="SendMessage" method="post">
+        <input type="hidden" name="cno" value="@selectedCno" />
+        <select name="toUserId">
+            @foreach (var user in users)
+            {
+                <option value="@user.USERID">@user.ACCOUNT - @user.ROLE</option>
+            }
+        </select>
+        <input name="content" placeholder="留言内容" />
+        <button type="submit">发送</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>发送人</th>
+                <th>接收人</th>
+                <th>内容</th>
+                <th>时间</th>
+                <th>已读</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (messages != null)
+            {
+                foreach (DataRow row in messages.Rows)
+                {
+                    <tr>
+                        <td>@row["FROMUSERID"]</td>
+                        <td>@row["TOUSERID"]</td>
+                        <td>@row["CONTENT"]</td>
+                        <td>@row["CREATEDAT"]</td>
+                        <td>@row["ISREAD"]</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>

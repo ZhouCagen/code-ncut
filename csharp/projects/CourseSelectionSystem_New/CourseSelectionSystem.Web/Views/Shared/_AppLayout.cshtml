@@ -1,0 +1,85 @@
+@{
+    string? role = Context.Session.GetString("ROLE");
+    string? account = Context.Session.GetString("ACCOUNT");
+
+    string homeController = role switch
+    {
+        "Student" => "Student",
+        "Teacher" => "Teacher",
+        "CollegeAdmin" => "CollegeAdmin",
+        "SystemAdmin" => "SystemAdmin",
+        _ => "Account"
+    };
+}
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - 选课系统</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="shell">
+        <aside class="sidebar">
+            <div class="brand">i Academy</div>
+
+            <a class="nav-item" asp-controller="@homeController" asp-action="Index">首页</a>
+
+            @if (role == "Student")
+            {
+                <a class="nav-item" href="#courses">开放课程</a>
+                <a class="nav-item" href="#selections">我的选课</a>
+                <a class="nav-item" href="#scores">我的成绩</a>
+                <a class="nav-item" href="#coursewares">课件</a>
+                <a class="nav-item" href="#messages">留言</a>
+            }
+            else if (role == "Teacher")
+            {
+                <a class="nav-item" href="#courses">我的课程</a>
+                <a class="nav-item" href="#students">中签学生</a>
+                <a class="nav-item" href="#scores">成绩管理</a>
+                <a class="nav-item" href="#coursewares">课件</a>
+                <a class="nav-item" href="#messages">留言</a>
+            }
+            else if (role == "CollegeAdmin")
+            {
+                <a class="nav-item" href="#students">学生管理</a>
+                <a class="nav-item" href="#teachers">教师管理</a>
+                <a class="nav-item" href="#courses">课程管理</a>
+                <a class="nav-item" href="#lottery">抽签</a>
+                <a class="nav-item" href="#messages">留言</a>
+            }
+            else if (role == "SystemAdmin")
+            {
+                <a class="nav-item" href="#colleges">学院管理</a>
+                <a class="nav-item" href="#users">账号管理</a>
+                <a class="nav-item" href="#overview">系统总览</a>
+            }
+
+            <a class="nav-item danger" asp-controller="Account" asp-action="Logout">退出登录</a>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <input class="search" placeholder="What do you want to find?" />
+                <div class="user-box">
+                    <span>@account</span>
+                    <small>@role</small>
+                </div>
+            </header>
+
+            @if (TempData["Message"] != null)
+            {
+                string cls = TempData["Success"]?.ToString() == "true" ? "success" : "error";
+
+                <div class="alert @cls">
+                    @TempData["Message"]
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+</body>
+</html>
