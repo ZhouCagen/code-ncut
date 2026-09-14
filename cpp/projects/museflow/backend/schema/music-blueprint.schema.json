@@ -1,0 +1,198 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MuseFlow MusicBlueprint",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "sceneDescription": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "game",
+        "video",
+        "animation",
+        "story",
+        "song",
+        "other"
+      ]
+    },
+    "genre": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "subGenre": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 60
+    },
+    "mood": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      }
+    },
+    "bpm": {
+      "type": "integer",
+      "minimum": 40,
+      "maximum": 240
+    },
+    "key": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 30
+    },
+    "instruments": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      }
+    },
+    "vocalMode": {
+      "type": "string",
+      "enum": [
+        "instrumental",
+        "vocal"
+      ]
+    },
+    "vocalGender": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 30
+    },
+    "language": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 30
+    },
+    "lyrics": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 6000
+    },
+    "targetDurationSeconds": {
+      "type": "number",
+      "minimum": 5,
+      "maximum": 600
+    },
+    "strictDuration": {
+      "type": "boolean"
+    },
+    "structure": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "startSeconds": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 600
+          },
+          "endSeconds": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 600
+          },
+          "emotion": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 100
+          },
+          "intensity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "instruments": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "startSeconds",
+          "endSeconds",
+          "emotion",
+          "intensity",
+          "instruments",
+          "description"
+        ]
+      }
+    },
+    "negativePrompt": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 1200
+    },
+    "finalLyriaPrompt": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16000
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "sceneDescription",
+    "purpose",
+    "genre",
+    "subGenre",
+    "mood",
+    "bpm",
+    "key",
+    "instruments",
+    "vocalMode",
+    "vocalGender",
+    "language",
+    "lyrics",
+    "targetDurationSeconds",
+    "strictDuration",
+    "structure",
+    "negativePrompt",
+    "finalLyriaPrompt"
+  ]
+}

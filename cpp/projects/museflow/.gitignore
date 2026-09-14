@@ -1,0 +1,14 @@
+build/
+frontend/node_modules/
+frontend/dist/
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+.runtime/
+__pycache__/
+frontend/test-results/
+frontend/playwright-report/
+*.tsbuildinfo

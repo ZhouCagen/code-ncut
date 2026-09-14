@@ -1,0 +1,1 @@
+<template><div class="page-heading"><div><span class="eyebrow">INSPIRATION COLLECTION</span><h1>灵感素材</h1></div></div><section class="card empty-state"><span class="subtle-tag">尚未实现</span><h2>灵感素材管理待后续开发</h2><p>目前可以直接在创作台输入场景描述。素材的收集、分类和复用尚未开放。</p><RouterLink class="button" to="/studio">返回创作台 →</RouterLink></section></template>

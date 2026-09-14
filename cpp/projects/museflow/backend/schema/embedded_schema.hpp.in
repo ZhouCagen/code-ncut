@@ -1,0 +1,5 @@
+#pragma once
+#include <string_view>
+namespace museflow {
+inline constexpr std::string_view blueprintSchemaText = R"MF_SCHEMA(@MUSEFLOW_BLUEPRINT_SCHEMA@)MF_SCHEMA";
+}

@@ -1,0 +1,21 @@
+find_package(Qt6 6.4 REQUIRED COMPONENTS Widgets Network WebEngineWidgets)
+add_executable(museflow-desktop src/main.cpp src/window.cpp src/local_page.cpp)
+target_link_libraries(museflow-desktop PRIVATE Qt6::Widgets Qt6::Network Qt6::WebEngineWidgets)
+target_compile_options(museflow-desktop PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_definitions(museflow-desktop PRIVATE
+    MUSEFLOW_PROJECT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/.."
+    MUSEFLOW_BACKEND_PATH="$<TARGET_FILE:museflow>")
+set_target_properties(museflow-desktop PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+add_dependencies(museflow-desktop museflow)
+qt_add_resources(museflow-desktop icons PREFIX "/" BASE resources FILES resources/museflow.svg)
+if(BUILD_TESTING)
+  find_package(Qt6 6.4 REQUIRED COMPONENTS Test)
+  add_executable(museflow_desktop_tests tests/native_tests.cpp src/window.cpp src/local_page.cpp)
+  set_target_properties(museflow_desktop_tests PROPERTIES AUTOMOC ON RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+  target_include_directories(museflow_desktop_tests PRIVATE src)
+  target_link_libraries(museflow_desktop_tests PRIVATE Qt6::Widgets Qt6::Network Qt6::WebEngineWidgets Qt6::Test)
+  target_compile_definitions(museflow_desktop_tests PRIVATE MUSEFLOW_PROJECT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/.." MUSEFLOW_BACKEND_PATH="$<TARGET_FILE:museflow>")
+  add_dependencies(museflow_desktop_tests museflow)
+  qt_add_resources(museflow_desktop_tests test_icons PREFIX "/" BASE resources FILES resources/museflow.svg)
+  # Run via scripts/test-desktop.sh: GUI/network tests need exclusive access to the local port.
+endif()
