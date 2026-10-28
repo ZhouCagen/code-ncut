@@ -1,0 +1,24 @@
+# Vivado generated workspaces, logs and build output
+**/.Xil/
+**/*.cache/
+**/*.hw/
+**/*.ip_user_files/
+**/*.sim/
+**/*.runs/
+**/*.gen/
+**/xsim.dir/
+**/webtalk/
+*.jou
+*.log
+*.wdb
+*.vcd
+*.bit
+*.dcp
+*.rpt
+*.rpx
+*.xpr
+
+# Simulation output / temporary
+*.pb
+*.str
+*.backup
